@@ -63,10 +63,10 @@ class FoodApiClient {
 
   // ---- CONFIGURACION: rellena con TU worker de Cloudflare ----
   // Tras desplegar el worker, pega aqui su URL + la ruta del endpoint:
-  //   https://fitai-food-proxy.TU-USUARIO.workers.dev/api/v1/food-analysis
+  //   https://fitai-food-proxy.ploesfelix.workers.dev/api/v1/food-analysis
   // El worker guarda la clave de Gemini en secreto; la app NO lleva ninguna clave.
   static const String _endpoint =
-      'https://fitai-food-proxy.TU-USUARIO.workers.dev/api/v1/food-analysis';
+      'https://fitai-food-proxy.ploesfelix.workers.dev/api/v1/food-analysis';
   static const String _apiKey = ''; // <- vacio: la clave vive en el worker, no aqui
 
   late final Dio _dio = Dio(BaseOptions(
