@@ -22,6 +22,3 @@ workflows:
           flutter build ipa --release
     artifacts:
       - fitai_pro/build/ios/ipa/*.ipa
-    publishing:
-      app_store_connect:
-        api_key: DJ8T842N9B
