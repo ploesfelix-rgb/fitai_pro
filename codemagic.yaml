@@ -8,7 +8,7 @@ workflows:
       cocoapods: default
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.fitai.fitai
+        bundle_identifier: com.ploegmakers.fitai
     scripts:
       - name: Set up project
         script: |
