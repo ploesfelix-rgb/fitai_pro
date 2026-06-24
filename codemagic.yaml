@@ -16,8 +16,9 @@ workflows:
       - name: Install pods
         script: |
           cd fitai_pro/ios
-          sed -i '' "s/# platform :ios, '12.0'/platform :ios, '15.5'/" Podfile
-          sed -i '' "s/platform :ios, '[0-9.]*'/platform :ios, '15.5'/" Podfile
+          echo "platform :ios, '15.5'" > /tmp/platform_line.txt
+          cat /tmp/platform_line.txt Podfile > /tmp/Podfile_new.txt
+          mv /tmp/Podfile_new.txt Podfile
           pod install
       - name: Build iOS
         script: |
