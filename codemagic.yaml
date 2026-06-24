@@ -1,0 +1,27 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up project
+        script: |
+          cd fitai_pro
+          flutter create . --org com.fitai --project-name fitai_pro
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+      - name: Install pods
+        script: |
+          cd fitai_pro/ios && pod install
+      - name: Build iOS
+        script: |
+          cd fitai_pro
+          flutter build ipa --release
+    artifacts:
+      - fitai_pro/build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        api_key: DJ8T842N9B
