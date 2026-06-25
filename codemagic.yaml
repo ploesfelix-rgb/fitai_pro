@@ -33,11 +33,9 @@ workflows:
       - name: Inject Clean Podfile and Exclude Duplicate SQLite
         script: |
           echo "IPHONEOS_DEPLOYMENT_TARGET=15.5" >> fitai_pro/ios/Flutter/Generated.xcconfig
-          
           cat > fitai_pro/ios/Podfile << 'EOF'
           platform :ios, '15.5'
           ENV['COCOAPODS_DISABLE_STATS'] = 'true'
-          
           def flutter_root
             gen_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
             root_path = nil
@@ -49,24 +47,19 @@ workflows:
             end
             root_path
           end
-          
           require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
           flutter_ios_podfile_setup
-          
           target 'Runner' do
             use_frameworks!
             use_modular_headers!
             flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
           end
-          
           post_install do |installer|
             installer.pods_project.targets.each do |target|
               flutter_additional_ios_build_settings(target)
-              
               if target.name == 'sqlite3_flutter_libs'
                 target.remove_from_project
               end
-              
               target.build_configurations.each do |config|
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
                 config.build_settings['DEVELOPMENT_TEAM'] = 'CRY44CCQ2'
@@ -83,23 +76,38 @@ workflows:
         script: |
           keychain initialize
           xcode-project use-profiles
+      - name: Create Export Options
+        script: |
+          cat > /tmp/ExportOptions.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>CRY44CCQ2</string>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
       - name: Build iOS IPA and Auto Sign
         script: |
           cd fitai_pro
           flutter build ipa --release \
+            --export-options-plist=/tmp/ExportOptions.plist \
             --build-name=1.0.0 \
             --build-number=$((${BUILD_NUMBER:-1}))
-          
-          # TRUCO MAESTRO: Copiamos físicamente el archivo generado en la subcarpeta y lo pegamos en la raíz
-          find build/ios/ipa -name "*.ipa" -exec cp {} ../ \; 2>/dev/null || find . -name "*.ipa" -exec cp {} ../ \;
     artifacts:
-      # Buscamos el archivo directamente en la raíz para que Codemagic lo capture al 100% sin perderse
-      - "*.ipa"
+      - fitai_pro/build/ios/ipa/*.ipa
+      - "**/*.ipa"
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-
 
 
 
