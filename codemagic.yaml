@@ -11,17 +11,13 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.ploegmakers.fitai
-        provisioning_profile_specifier: FitAi
-    scripts:
+     scripts:
       - name: Set up project
         script: |
           cd fitai_pro
           flutter create . --org com.ploegmakers --project-name fitai
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
-      - name: Fix bundle ID and Team
-        script: |
-          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = com.ploegmakers.fitai;/PRODUCT_BUNDLE_IDENTIFIER = com.ploegmakers.fitai;\n\t\t\t\tDEVELOPMENT_TEAM = CRY44CCQ2;/g' fitai_pro/ios/Runner.xcodeproj/project.pbxproj
       - name: Write Podfile
         script: |
           cat > fitai_pro/ios/Podfile << 'EOF'
