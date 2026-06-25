@@ -69,7 +69,7 @@ workflows:
               
               target.build_configurations.each do |config|
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
-                config.build_settings['DEVELOPMENT_TEAM'] = ENV['COCOAPODS_DEVELOPMENT_TEAM'] if ENV['COCOAPODS_DEVELOPMENT_TEAM']
+                config.build_settings['DEVELOPMENT_TEAM'] = 'CRY44CCQ2'
               end
             end
           end
@@ -90,10 +90,10 @@ workflows:
             --build-name=1.0.0 \
             --build-number=$((${BUILD_NUMBER:-1}))
           
-          # TRUCO DEFINITIVO: Buscamos el archivo generado en la subcarpeta y lo copiamos a la raíz
+          # TRUCO MAESTRO: Copiamos físicamente el archivo generado en la subcarpeta y lo pegamos en la raíz
           find build/ios/ipa -name "*.ipa" -exec cp {} ../ \; 2>/dev/null || find . -name "*.ipa" -exec cp {} ../ \;
     artifacts:
-      # Ahora Codemagic solo tiene que buscar el archivo en la raíz del proyecto
+      # Buscamos el archivo directamente en la raíz para que Codemagic lo capture al 100% sin perderse
       - "*.ipa"
     publishing:
       app_store_connect:
