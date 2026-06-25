@@ -20,12 +20,23 @@ workflows:
           rm -rf ios
           rm -rf .dart_tool
           rm -f pubspec.lock
-      - name: Rebuild iOS Native Project and Fetch Dependencies
+          flutter clean
+      - name: Rebuild iOS Native Project
         script: |
           cd fitai_pro
           flutter create . --platforms=ios --org com.ploegmakers --project-name fitai
+      - name: Fetch Dependencies and Generate Configs
+        script: |
+          cd fitai_pro
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+      - name: Force iOS 15.5 Deployment Target
+        script: |
+          # Modificamos de forma directa las variables que hereda Xcode de Flutter
+          echo "IPHONEOS_DEPLOYMENT_TARGET=15.5" >> fitai_pro/ios/Flutter/Generated.xcconfig
+          
+          # Añadimos la regla de la plataforma en la cabecera del Podfile
+          echo "platform :ios, '15.5'" | cat - fitai_pro/ios/Podfile > temp && mv temp fitai_pro/ios/Podfile
       - name: Install Pods Dependencies
         script: |
           cd fitai_pro/ios
@@ -40,6 +51,7 @@ workflows:
           cd fitai_pro
           flutter build ipa --release \
             --export-options-plist=$HOME/export_options.plist \
+            --build-name=1.0.0 \
             --build-number=$((${BUILD_NUMBER:-1}))
     artifacts:
       - fitai_pro/build/ios/ipa/*.ipa
@@ -47,3 +59,4 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+
