@@ -8,12 +8,14 @@ workflows:
       cocoapods: default
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.ploegmakers.fitai
+        bundle_identifier: com.ploegmakers.fitai_pro
+    integrations:
+      app_store_connect: Cuenta Apple Felix
     scripts:
       - name: Set up project
         script: |
           cd fitai_pro
-          flutter create . --org com.fitai --project-name fitai_pro
+          flutter create . --org com.ploegmakers --project-name fitai_pro
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
       - name: Write Podfile
