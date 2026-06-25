@@ -2,6 +2,8 @@ workflows:
   ios-workflow:
     name: iOS Workflow
     max_build_duration: 60
+    cache:
+      cache_paths: []
     integrations:
       app_store_connect: Cuenta Apple Felix
     environment:
@@ -12,10 +14,15 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.ploegmakers.fitai
     scripts:
-      - name: Rebuild iOS Native Project and Fetch Dependencies
+      - name: Hard Clean Project
         script: |
           cd fitai_pro
           rm -rf ios
+          rm -rf .dart_tool
+          rm -f pubspec.lock
+      - name: Rebuild iOS Native Project and Fetch Dependencies
+        script: |
+          cd fitai_pro
           flutter create . --platforms=ios --org com.ploegmakers --project-name fitai
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
