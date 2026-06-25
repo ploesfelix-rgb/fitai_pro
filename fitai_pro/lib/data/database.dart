@@ -9,7 +9,6 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 part 'database.g.dart'; // generado: dart run build_runner build
 
@@ -70,7 +69,6 @@ const _keyName = 'fitai_db_key';
 
 LazyDatabase openEncrypted() {
   return LazyDatabase(() async {
-    await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'fitai_enc.db'));
     var key = await _secure.read(key: _keyName);
