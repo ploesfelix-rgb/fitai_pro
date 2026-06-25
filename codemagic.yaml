@@ -9,7 +9,7 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      cocoapods: stable
+      cocoapods: default # CORRECCIÓN: Volvemos al valor oficial que funcionaba bien
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.ploegmakers.fitai
@@ -90,7 +90,7 @@ workflows:
             --build-name=1.0.0 \
             --build-number=$((${BUILD_NUMBER:-1}))
     artifacts:
-      # CORRECCIÓN: Escáner recursivo global para capturar la IPA sin importar variaciones de nombre de proyecto
+      # Mantenemos el buscador avanzado recursivo para capturar el archivo ipa generado
       - fitai_pro/build/ios/ipa/**/*.ipa
     publishing:
       app_store_connect:
