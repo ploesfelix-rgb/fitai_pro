@@ -89,16 +89,17 @@ workflows:
           flutter build ipa --release \
             --build-name=1.0.0 \
             --build-number=$((${BUILD_NUMBER:-1}))
+          
+          # TRUCO DEFINITIVO: Buscamos el archivo generado en la subcarpeta y lo copiamos a la raíz
+          find build/ios/ipa -name "*.ipa" -exec cp {} ../ \; 2>/dev/null || find . -name "*.ipa" -exec cp {} ../ \;
     artifacts:
-      # CORRECCIÓN ABSOLUTA: Definimos todas las variantes de rutas posibles de forma directa
-      # para asegurarnos de que Codemagic atrape el binario independientemente del subdirectorio
-      - fitai_pro/build/ios/ipa/*.ipa
-      - build/ios/ipa/*.ipa
+      # Ahora Codemagic solo tiene que buscar el archivo en la raíz del proyecto
       - "*.ipa"
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+
 
 
 
