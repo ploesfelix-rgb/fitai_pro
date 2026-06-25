@@ -10,10 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # --- Cliente HTTP / API (Resuelve DioException, FormData y MultipartFile) ---
+  # --- Cliente HTTP / API (Arregla los errores de DioException) ---
   dio: ^5.4.0
 
-  # --- Base de Datos Encriptada (Ambas declaradas para evitar el error de FileSystemException en Dart) ---
+  # --- Base de Datos Encriptada (Mantenemos ambas para calmar al compilador de Dart) ---
   sqlite3_flutter_libs: ^0.5.20
   sqlcipher_flutter_libs: ^0.6.0
   path_provider: ^2.1.0
@@ -46,6 +46,13 @@ dev_dependencies:
   drift_dev: ^2.18.0
   build_runner: ^2.4.0
 
+# --- ELIMINACIÓN DE DUPLICADO NATIVO ---
+# Forzamos la versión 0.6.0 de sqlite3_flutter_libs como anulación. Esta versión 
+# actúa como un cascarón vacío en iOS y no duplica el plugin nativo, solucionando el choque.
+dependency_overrides:
+  sqlite3_flutter_libs: ^0.6.0
+
 flutter:
   uses-material-design: true
+
 
