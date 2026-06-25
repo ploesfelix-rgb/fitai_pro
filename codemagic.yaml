@@ -1,5 +1,7 @@
 workflows:
   ios-workflow:
+   workflows:
+  ios-workflow:
     name: iOS Workflow
     max_build_duration: 60
     cache:
@@ -30,13 +32,53 @@ workflows:
           cd fitai_pro
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
-      - name: Force iOS 15.5 Deployment Target
+      - name: Force iOS 15.5 and Exclude Duplicate SQLite Module
         script: |
-          # Modificamos de forma directa las variables que hereda Xcode de Flutter
+          # 1. Aseguramos el target nativo de Flutter en las propiedades del entorno global
           echo "IPHONEOS_DEPLOYMENT_TARGET=15.5" >> fitai_pro/ios/Flutter/Generated.xcconfig
           
-          # Añadimos la regla de la plataforma en la cabecera del Podfile
-          echo "platform :ios, '15.5'" | cat - fitai_pro/ios/Podfile > temp && mv temp fitai_pro/ios/Podfile
+          # 2. Inyectamos el Podfile definitivo que remueve el conflicto de nombres de Sqlite3FlutterLibsPlugin
+          cat > fitai_pro/ios/Podfile << 'EOF'
+          platform :ios, '15.5'
+          ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+          
+          def flutter_root
+            gen_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+            root_path = nil
+            File.foreach(gen_path) do |line|
+              if line =~ /FLUTTER_ROOT\=(.*)/
+                root_path = $1.strip
+                break
+              end
+            end
+            root_path
+          end
+          
+          require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+          flutter_ios_podfile_setup
+          
+          target 'Runner' do
+            use_frameworks!
+            use_modular_headers!
+            flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+          end
+          
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              flutter_additional_ios_build_settings(target)
+              
+              # Extirpamos el módulo duplicado de sqlite nativo para que Xcode use únicamente SQLCipher
+              if target.name == 'sqlite3_flutter_libs'
+                target.remove_from_project
+              end
+              
+              target.build_configurations.each do |config|
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
+                config.build_settings['DEVELOPMENT_TEAM'] = ENV['COCOAPODS_DEVELOPMENT_TEAM'] if ENV['COCOAPODS_DEVELOPMENT_TEAM']
+              end
+            end
+          end
+          EOF
       - name: Install Pods Dependencies
         script: |
           cd fitai_pro/ios
@@ -59,4 +101,3 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-

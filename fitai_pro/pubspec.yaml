@@ -1,44 +1,38 @@
 name: fitai
-description: FitAI Engine - app movil nativa de produccion (Flutter).
-publish_to: "none"
+description: "A new Flutter project."
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
-  flutter: ">=3.22.0"
+  sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # --- Modulo 1: red (cliente REST con interceptores y timeouts) ---
-  dio: ^5.5.0
-
-  # --- Modulo 3: persistencia local cifrada (SQLite + SQLCipher via Drift) ---
-  drift: ^2.18.0
-  sqlite3_flutter_libs: ^0.5.0
+  # --- Base de Datos Encriptada con SQLCipher ---
   sqlcipher_flutter_libs: ^0.6.0
   path_provider: ^2.1.0
   path: ^1.9.0
-  flutter_secure_storage: ^9.2.0   # clave de cifrado en Keychain/Keystore
+  flutter_secure_storage: ^9.2.0
 
-  # --- Modulo 3: camara nativa en vivo ---
+  # --- Módulo 3: Cámara nativa en vivo ---
   camera: ^0.11.0
 
-  # --- Modulo 3: deteccion de pose anatomica LOCAL (escaner biometrico real) ---
+  # --- Módulo 3: Detección de pose anatómica LOCAL ---
   google_mlkit_pose_detection: ^0.13.0
   google_mlkit_commons: ^0.9.0
 
-  # --- Modulo 5: dictado por voz local ---
+  # --- Módulo 5: Dictado por voz local ---
   speech_to_text: ^6.6.0
 
-  # --- Modulo 5: imagenes failsafe desde la API (free-exercise-db / ExerciseDB) ---
+  # --- Módulo 5: Imágenes desde la API ---
   cached_network_image: ^3.3.0
 
-  # --- Modulo 6: notificaciones locales contextuales ---
+  # --- Módulo 6: Notificaciones locales ---
   flutter_local_notifications: ^17.2.0
 
-  # --- estado global reactivo ---
+  # --- Estado global reactivo ---
   provider: ^6.1.0
 
 dev_dependencies:
