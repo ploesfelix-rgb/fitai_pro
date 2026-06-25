@@ -9,7 +9,7 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      cocoapods: default
+      cocoapods: stable
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.ploegmakers.fitai
@@ -30,10 +30,50 @@ workflows:
           cd fitai_pro
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
-      - name: Force iOS 15.5 Deployment Target
+      - name: Inject Clean Podfile and Exclude Duplicate SQLite
         script: |
           echo "IPHONEOS_DEPLOYMENT_TARGET=15.5" >> fitai_pro/ios/Flutter/Generated.xcconfig
-          echo "platform :ios, '15.5'" | cat - fitai_pro/ios/Podfile > temp && mv temp fitai_pro/ios/Podfile
+          
+          cat > fitai_pro/ios/Podfile << 'EOF'
+          platform :ios, '15.5'
+          ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+          
+          def flutter_root
+            gen_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+            root_path = nil
+            File.foreach(gen_path) do |line|
+              if line =~ /FLUTTER_ROOT\=(.*)/
+                root_path = $1.strip
+                break
+              end
+            end
+            root_path
+          end
+          
+          require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+          flutter_ios_podfile_setup
+          
+          target 'Runner' do
+            use_frameworks!
+            use_modular_headers!
+            flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+          end
+          
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              flutter_additional_ios_build_settings(target)
+              
+              if target.name == 'sqlite3_flutter_libs'
+                target.remove_from_project
+              end
+              
+              target.build_configurations.each do |config|
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
+                config.build_settings['DEVELOPMENT_TEAM'] = ENV['COCOAPODS_DEVELOPMENT_TEAM'] if ENV['COCOAPODS_DEVELOPMENT_TEAM']
+              end
+            end
+          end
+          EOF
       - name: Install Pods Dependencies
         script: |
           cd fitai_pro/ios
@@ -50,9 +90,12 @@ workflows:
             --build-name=1.0.0 \
             --build-number=$((${BUILD_NUMBER:-1}))
     artifacts:
-      - fitai_pro/build/ios/ipa/*.ipa
+      # CORRECCIÓN: Escáner recursivo global para capturar la IPA sin importar variaciones de nombre de proyecto
+      - fitai_pro/build/ios/ipa/**/*.ipa
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+
+
 
