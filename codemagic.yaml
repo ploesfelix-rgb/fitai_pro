@@ -12,65 +12,31 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.ploegmakers.fitai
     scripts:
-      - name: Initialize iOS Platform (Fix Scheme & Workspace)
+      - name: Rebuild iOS Native Project and Fetch Dependencies
         script: |
           cd fitai_pro
+          rm -rf ios
           flutter create . --platforms=ios --org com.ploegmakers --project-name fitai
-      - name: Set up project dependencies
-        script: |
-          cd fitai_pro
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
-      - name: Write Podfile
-        script: |
-          cat > fitai_pro/ios/Podfile << 'EOF'
-          platform :ios, '15.5'
-          ENV['COCOAPODS_DISABLE_STATS'] = 'true'
-          project 'Runner', {
-            'Debug' => :debug,
-            'Profile' => :release,
-            'Release' => :release,
-          }
-          def flutter_root
-            generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-            File.foreach(generated_xcode_build_settings_path) do |line|
-              matches = line.match(/FLUTTER_ROOT\=(.*)/)
-              return matches.strip if matches
-            end
-          end
-          require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
-          flutter_ios_podfile_setup
-          target 'Runner' do
-            use_frameworks!
-            use_modular_headers!
-            flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-          end
-          post_install do |installer|
-            installer.pods_project.targets.each do |target|
-              flutter_additional_ios_build_settings(target)
-              target.build_configurations.each do |config|
-                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
-                config.build_settings['DEVELOPMENT_TEAM'] = ENV['COCOAPODS_DEVELOPMENT_TEAM'] if ENV['COCOAPODS_DEVELOPMENT_TEAM']
-              end
-            end
-          end
-          EOF
-      - name: Install pods
+      - name: Install Pods Dependencies
         script: |
           cd fitai_pro/ios
           pod repo update
           pod install --repo-update
-      - name: Build iOS IPA
+      - name: Prepare Apple Certificates
+        script: |
+          keychain initialize
+          xcode-project use-profiles
+      - name: Build iOS IPA and Auto Sign
         script: |
           cd fitai_pro
-          flutter build ipa --release --export-options-plist=$HOME/export_options.plist
+          flutter build ipa --release \
+            --export-options-plist=$HOME/export_options.plist \
+            --build-number=$((${BUILD_NUMBER:-1}))
     artifacts:
       - fitai_pro/build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
         auth: integration
-        # Cambia a false si quieres que se publique directamente en App Store en vez de TestFlight
-        submit_to_testflight: true 
-        # Opcional: añade los correos de tus testers beta aquí (deben estar en App Store Connect)
-        # beta_testers:
-        #   - tu-tester@email.com
+        submit_to_testflight: true
