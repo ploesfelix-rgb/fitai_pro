@@ -26,6 +26,15 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	
+	<!-- PERMISOS DE PRIVACIDAD OBLIGATORIOS PARA PRODUCCIÓN (MÓDULOS REQUERIDOS) -->
+	<key>NSCameraUsageDescription</key>
+	<string>Necesitamos acceso a la cámara para la detección y análisis de tus poses anatómicas en tiempo real.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Necesitamos acceso al micrófono para permitirte dictar tus comidas por voz de manera local.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Necesitamos permiso de reconocimiento de voz para traducir tus dictados en registros de nutrición.</string>
+
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -68,3 +77,4 @@
 	</array>
 </dict>
 </plist>
+
