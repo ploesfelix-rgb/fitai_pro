@@ -9,7 +9,7 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      cocoapods: default # CORRECCIÓN: Volvemos al valor oficial que funcionaba bien
+      cocoapods: default
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.ploegmakers.fitai
@@ -90,12 +90,16 @@ workflows:
             --build-name=1.0.0 \
             --build-number=$((${BUILD_NUMBER:-1}))
     artifacts:
-      # Mantenemos el buscador avanzado recursivo para capturar el archivo ipa generado
-      - fitai_pro/build/ios/ipa/**/*.ipa
+      # CORRECCIÓN ABSOLUTA: Definimos todas las variantes de rutas posibles de forma directa
+      # para asegurarnos de que Codemagic atrape el binario independientemente del subdirectorio
+      - fitai_pro/build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa
+      - "*.ipa"
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+
 
 
 
